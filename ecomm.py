@@ -1,34 +1,51 @@
-import pandas as pd 
+import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns 
+import seaborn as sns
 import streamlit as st
 
 def main():
-    st.title("This is my streamlit app for ecomm businss that I have")
-    st.sidebar.title("Upload your file")
-    uploaded_file=st.sidebar.file_uploader("Upload your file , type=['csv','xlsx']")
+    st.title("🛒 E-commerce Business Data Explorer")
+    st.sidebar.title("Upload Your File")
+    
+    uploaded_file = st.sidebar.file_uploader("Upload your CSV or Excel file", type=['csv', 'xlsx'])
+    
     if uploaded_file is not None:
         try:
+            # Load data according to file type
             if uploaded_file.name.endswith('.csv'):
-                pd.read_csv(uploaded_file)
+                data = pd.read_csv(uploaded_file)
             else:
-                data=pd.read_excel(uploaded_file)
-            st.sidebar.success("file uploaded sucessfully")
+                data = pd.read_excel(uploaded_file)
             
-            st.subheader("data overview")
+            st.sidebar.success("✅ File uploaded successfully!")
+            
+            # Show data overview
+            st.subheader("📊 Data Overview")
             st.dataframe(data.head())
             
-            st.subheader("Basic information of the data")
-            st.write("Shape of the data is",data.shape)
-            st.write("Columns in my data",data.columns)
-            st.write("missing value",data.isnull().sum())
-            st.subheader("I wil show you stats of data")
+            # Basic info
+            st.subheader("ℹ️ Basic Information")
+            st.write(f"Shape of the data: {data.shape}")
+            st.write(f"Columns: {list(data.columns)}")
+            st.write("Missing values per column:")
+            st.write(data.isnull().sum())
+            
+            # Descriptive statistics
+            st.subheader("📈 Statistical Summary")
             st.write(data.describe())
             
-            
-            
-        except:
-            print("it will handle if things go wrong")
+            # Optional: show a correlation heatmap if numeric columns exist
+            numeric_cols = data.select_dtypes(include=['float64', 'int64']).columns
+            if len(numeric_cols) > 1:
+                st.subheader("🔗 Correlation Heatmap")
+                fig, ax = plt.subplots(figsize=(8, 6))
+                sns.heatmap(data[numeric_cols].corr(), annot=True, cmap="coolwarm", ax=ax)
+                st.pyplot(fig)
+            else:
+                st.info("Not enough numeric columns to display correlation heatmap.")
+                
+        except Exception as e:
+            st.error(f"⚠️ Oops! Something went wrong: {e}")
 
-if __name__=="__main__":
-     main()
+if __name__ == "__main__":
+    main()
